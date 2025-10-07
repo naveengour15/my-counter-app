@@ -4,40 +4,64 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import Tooltip from '@mui/material/Tooltip';
 import './App.css';
-
 const App = () => {
   const [globalCount, setGlobalCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
 
-  const API_URI = "http://localhost/5000";
+  const API_URI = "https://localhost:7123/api/Home/";
 
   const fetchGlobalCount = async () => {
-    const res = await fetch(`${API_URI}/counter/global`, {
-      method: "POST"
-    });
-    const data = await res.json();
-    setGlobalCount(data);
+   
+    try {
+      const res = await fetch(`${API_URI}GetCount`, {
+        method: "GET",
+      });
+      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
+      const obj = JSON.parse(data);
+console.log(obj.Count);
+
+    setGlobalCount(obj.Count);
+
+        
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+    
+
   };
 
-  // useEffect(() => {
-  //   fetchGlobalCount();
-  // }, []);
+  useEffect(() => {
+    fetchGlobalCount();
+  }, []);
 
   const incrementGlobal = async () => {
-    // const res = await fetch(`${API_URI}/counter/global/increment`, {
-    //   method: "POST"
-    // });
-    // const globalData = await res.json();
+    
     let globalData = globalCount + 1;
     setGlobalCount(globalData);
 
   }
 
+    const saveGlobalCount = async () => { 
+     
+          try {
+            const res = await fetch(`${API_URI}SaveCount?count=${globalCount}`, {
+              method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Server error");
+            const data = await res.json();
+            console.log("Response:", data);
+            setGlobalCount(data.Count);
+          } catch (err) {
+            console.error("Fetch error:", err);
+          }
+
+          
+    }
+
   const incrementUser = async () => {
-    // const res = await fetch(`${API_URI}/counter/user/increment`, {
-    //   method: "POST"
-    // });
-    // const userData = await res.json();
+   
     let userData = userCount + 1;
     setUserCount(userData);
   }
@@ -54,6 +78,8 @@ const App = () => {
               <Tooltip  title="Add" arrow>
             
                 <Button variant="outlined" onClick={incrementGlobal} className="btn_green"> <AddIcon /> </Button>
+                
+                <Button variant="outlined" onClick={saveGlobalCount} className="btn_green"> Save </Button>
                 </Tooltip>
             </div>
         </div>
